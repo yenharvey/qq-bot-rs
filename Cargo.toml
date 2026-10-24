@@ -11,6 +11,10 @@ readme = "README.md"
 keywords = ["qq", "bot", "qqbot", "tencent", "async"]
 categories = ["api-bindings", "asynchronous"]
 
+[features]
+# 仅供本地测试覆盖接口地址，正常构建默认关闭。
+test-endpoints = []
+
 [dependencies]
 async-trait = "0.1.89"
 base64 = "0.22.1"

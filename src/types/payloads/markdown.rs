@@ -6,6 +6,14 @@ use serde::{Deserialize, Serialize};
 /// **支持矩阵**：v2 群 / c2c 原文 markdown 已对所有 bot 开放；v1 频道当前需
 /// QQ 内部邀请激活。
 ///
+/// **群内 @ 实测注意（2026-10-24）**：当前测试群/客户端中，同一个
+/// `<qqbot-at-user id="member_openid" />` 标签放在 `msg_type=0` 的 `content`
+/// 内会原样显示，即使 API 返回成功；放在 `msg_type=2` 的 `markdown.content`
+/// 内才显示为可点击的 @成员标签。群内 @ 请优先用
+/// `OutgoingMessage::markdown(MarkdownPayload::raw(...))`，且不设置顶层 `content`。
+/// ID 来自群消息的 `author.member_openid`，不是数字 QQ 号。
+/// 此为上述环境的渲染验证，不保证所有客户端一致，也不代表已验证通知送达。
+///
 /// `content` 里可嵌入 QQ 文本链 / 内联控件标签，SDK 不解析：
 /// ```text
 /// <qqbot-at-user id="100" />

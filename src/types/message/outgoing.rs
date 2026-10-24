@@ -42,13 +42,17 @@ pub enum MessageType {
 /// 有严格配额，超额按 [`crate::error::HttpError::ApiError`] 透出。开发期建议优先
 /// 走被动回复。
 ///
-/// **没有 quote API**：v2 群 / c2c 协议**不支持** `message_reference`。`reply_to`
+/// **本地更正**：当前官方群接口支持 `message_reference`（已在测试群显示引用卡片）。
+/// `reply_to` 本身
 /// 只用来：(1) 5 分钟内免主动配额发消息；(2) 后端日志关联原消息——**不是**给
-/// 用户看的引用展现。客户端不会把被动回复渲染成引用样式（只是普通消息）。
-/// 真正的"引用消息"卡片只在 v1 频道有效，走 [`OutgoingChannelMessage::quote`]。
+/// 用户看的引用展现。引用需另外指定 `message_reference`。
+/// 本地群测试使用 `experimental_group_quote`；频道使用 [`OutgoingChannelMessage::quote`]。
 #[derive(Debug, Clone, Serialize)]
 pub struct OutgoingMessage {
     msg_type: MessageType,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    message_reference: Option<MessageReference>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     content: Option<String>,
@@ -83,6 +87,7 @@ impl OutgoingMessage {
         Self {
             msg_type,
             content: None,
+            message_reference: None,
             msg_id: None,
             msg_seq: None,
             event_id: None,
@@ -94,6 +99,9 @@ impl OutgoingMessage {
         }
     }
 
+    /// 创建纯文本消息。群内 @ 请优先使用 `markdown(MarkdownPayload::raw(...))`：
+    /// 当前测试群中，@ 标签放在纯文本会原样显示，Markdown 才解析为成员标签。
+    /// 详见 [`MarkdownPayload`] 的群内 @ 实测说明；HTTP 成功不代表客户端渲染成功。
     pub fn text(content: impl Into<String>) -> Self {
         Self {
             content: Some(content.into()),
@@ -130,6 +138,16 @@ impl OutgoingMessage {
             media: Some(media),
             ..Self::empty(MessageType::Media)
         }
+    }
+
+    /// 设置群消息的引用目标，当前官方群消息接口已支持该字段。
+    /// HTTP 请求成功不代表 QQ 客户端一定显示引用卡片。
+    pub fn experimental_group_quote(mut self, message_id: impl Into<String>) -> Self {
+        self.message_reference = Some(MessageReference {
+            message_id: message_id.into(),
+            ignore_get_message_error: false,
+        });
+        self
     }
 
     /// 标记为对某条入站消息的被动回复。

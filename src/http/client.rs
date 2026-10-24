@@ -304,14 +304,14 @@ impl BotBuilder {
         self
     }
 
-    #[cfg(test)]
-    pub(crate) fn api_base(mut self, url: impl Into<String>) -> Self {
+    #[cfg(any(test, feature = "test-endpoints"))]
+    pub fn api_base(mut self, url: impl Into<String>) -> Self {
         self.api_base_override = Some(url.into());
         self
     }
 
-    #[cfg(test)]
-    pub(crate) fn token_endpoint(mut self, url: impl Into<String>) -> Self {
+    #[cfg(any(test, feature = "test-endpoints"))]
+    pub fn token_endpoint(mut self, url: impl Into<String>) -> Self {
         self.token_endpoint_override = Some(url.into());
         self
     }
