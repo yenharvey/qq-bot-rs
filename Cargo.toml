@@ -1,6 +1,6 @@
 [package]
 name = "qq-bot-rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "MIT"
 description = "Async Rust SDK for the Tencent QQ Bot v2 platform — HTTP + gateway + typed events."
